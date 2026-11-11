@@ -1,11 +1,19 @@
 import pytest
-from app.validation import validate_private_ipv4
+from fastapi import HTTPException
+from app.validation import validate_target, validate_ports
 
-@pytest.mark.parametrize("value", ["192.168.1.10", "10.0.0.5", "172.16.0.2"])
-def test_accepts_private_ipv4(value):
-    assert validate_private_ipv4(value) == value
+def test_private_ip_allowed():
+    assert validate_target("192.168.1.10") == "192.168.1.10"
 
-@pytest.mark.parametrize("value", ["8.8.8.8", "127.0.0.1", "169.254.1.1", "not-an-ip", "::1"])
-def test_rejects_non_private_or_invalid_targets(value):
-    with pytest.raises(ValueError):
-        validate_private_ipv4(value)
+@pytest.mark.parametrize("target", ["8.8.8.8", "127.0.0.1", "169.254.1.1", "::1", "not-an-ip"])
+def test_unsafe_or_invalid_target_rejected(target):
+    with pytest.raises(HTTPException):
+        validate_target(target)
+
+def test_port_validation():
+    assert validate_ports([22, 443]) == [22, 443]
+
+@pytest.mark.parametrize("ports", [[], [0], [65536], [80, 80], list(range(1, 22))])
+def test_bad_ports_rejected(ports):
+    with pytest.raises(HTTPException):
+        validate_ports(ports)
