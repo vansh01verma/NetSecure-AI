@@ -1,52 +1,30 @@
 # NetSecure AI
 
-A defensive network-security assessment starter built with Python and FastAPI.
-The first milestone provides a bounded TCP reachability scanner for a single
-private IPv4 host. It does not exploit services, authenticate to hosts, or scan
-public IP addresses.
+A defensive network exposure assessment API built with Python and FastAPI.
 
-## Current milestone
-- Private IPv4 validation
-- Explicit authorization confirmation
-- Bounded TCP connection checks against a fixed list of common ports
-- Structured JSON results
-- FastAPI health and scan endpoints
-- Unit tests for validation and safe scan behaviour
+## Implemented
+- Explicit authorization required for scans.
+- RFC1918 private IPv4 targets only; public, loopback, link-local and IPv6 targets are rejected.
+- TCP reachability checks with bounded timeouts and a maximum of 20 unique ports.
+- Evidence-based results distinguish `open` from `closed_or_filtered`.
+- Deterministic risk scoring with explanations and remediation guidance.
+- On-demand JSON and CSV reports.
+- Health, scan, analyze, report, reports and deterministic chat-fallback endpoints.
 
-## Setup (Windows CMD)
-```bat
-py -m venv .venv
-.venv\Scripts\activate
-py -m pip install -r requirements.txt
-copy .env.example .env
-py -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+## Run
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
 ```
 Open http://127.0.0.1:8000/docs
 
-## Run tests
-```bat
-py -m pytest -q
+## Test
+```bash
+pytest -q
 ```
 
-## API example
-`POST /scan`
-```json
-{
-  "target": "192.168.1.10",
-  "authorized": true,
-  "timeout_seconds": 0.5
-}
-```
-
-Only private IPv4 addresses are accepted. The scanner checks a fixed set of
-common TCP ports and applies a short timeout. Use it only on systems and
-networks you own or have explicit permission to assess.
-
-## Planned milestones
-1. Stabilise scanner and service evidence.
-2. Add transparent rule-based risk findings.
-3. Add NVD vulnerability intelligence.
-4. Add AI analyst with validated tool calls and deterministic fallback.
-5. Add JSON/CSV/HTML/PDF reports.
-6. Add authenticated API deployment.
-7. Integrate Nonilion only after obtaining and verifying its official Bot API guide.
+## Safety and limitations
+Use only against systems and networks you own or are explicitly authorized to assess. This project performs basic TCP reachability checks only; it does not exploit services, attempt credentials, evade monitoring, or modify targets. Port-based service names are hints, not verified fingerprints. An open port is not proof of a vulnerability. NVD/CVE enrichment, a live LLM, PDF/HTML reports, persistent report storage, Nonilion Bot API integration, authentication, and deployment configuration are not yet implemented.
